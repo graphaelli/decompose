@@ -1,0 +1,84 @@
+all:
+    image: ubuntu
+    build: /path/to/build/dir
+    dockerfile: Dockerfile-alternate
+    command: bundle exec thin -p 3000
+    links:
+         - db
+         - db:database
+         - redis
+    external_links:
+        - redis_1
+        - project_db_1:mysql
+        - project_db_1:postgresql
+    extra_hosts:
+        - "somehost:162.242.195.82"
+        - "otherhost:50.31.209.229"
+    ports:
+        - "3000"
+        - "8000:8000"
+        - "49100:22"
+        - "127.0.0.1:8001:8001"
+    expose:
+        - "3000"
+        - "8000"
+    volumes:
+        - /var/lib/mysql
+        - cache/:/tmp/cache
+        - ~/configs:/etc/configs/:ro
+    volumes_from:
+        - service_name
+        - container_name
+    # environment:
+    #     RACK_ENV: development
+    #     SESSION_SECRET:
+    environment:
+        - RACK_ENV=development
+        - SESSION_SECRET
+    # env_file: .env
+    env_file:
+        - ./common.env
+        - ./apps/web.env
+        - /opt/secrets.env
+    # labels:
+    #     com.example.description: "Accounting webapp"
+    #     com.example.department: "Finance"
+    #     com.example.label-with-empty-value: ""
+    labels:
+        - "com.example.description=Accounting webapp"
+        - "com.example.department=Finance"
+        - "com.example.label-with-empty-value"
+    log_driver: "json-file"
+    net: "bridge"
+    pid: "host"
+    # dns: 8.8.8.8
+    dns:
+        - 8.8.8.8
+        - 9.9.9.9
+    cap_add:
+        - ALL
+    cap_drop:
+        - NET_ADMIN
+        - SYS_ADMIN
+    # dns_search: example.com
+    dns_search:
+        - dc1.example.com
+        - dc2.example.com
+    devices:
+        - "/dev/ttyUSB0:/dev/ttyUSB0"
+    security_opt:
+        - label:user:USER
+        - label:role:ROLE
+    cpu_shares: 73
+    cpuset: 0,1
+    working_dir: /code
+    entrypoint: /code/entrypoint.sh
+    user: postgresql
+    hostname: foo
+    domainname: foo.com
+    mem_limit: 1000000000
+    privileged: true
+    restart: always
+    stdin_open: true
+    tty: true
+    read_only: true
