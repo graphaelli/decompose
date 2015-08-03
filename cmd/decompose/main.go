@@ -23,7 +23,7 @@ OPTIONS
 
     -p, -prefix
         Set a string to prefix names with. Default is directory name of
-        input file.
+        input file. For no prefix, provide an empty string.
 
     -r, -rm
         Generate docker run commands with the remove flag. This flag can't
@@ -45,8 +45,8 @@ func main() {
 
 	detach := flag.Bool("d", false, "")
 	flag.BoolVar(detach, "detach", false, "")
-	prefix := flag.String("p", "", "")
-	flag.StringVar(prefix, "prefix", "", "")
+	prefix := flag.String("p", "docker-compose dir", "")
+	flag.StringVar(prefix, "prefix", "docker-compose dir", "")
 	remove := flag.Bool("r", false, "")
 	flag.BoolVar(remove, "rm", false, "")
 	service := flag.String("s", "", "")
@@ -75,7 +75,7 @@ func main() {
 
 	inputFile := flag.Args()[0]
 
-	if *prefix == "" {
+	if *prefix == "docker-compose dir" {
 		// prefix is the directory that inputFile is in
 		finAbs, err := filepath.Abs(inputFile)
 		if err != nil {
