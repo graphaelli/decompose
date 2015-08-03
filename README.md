@@ -1,7 +1,7 @@
 # decompose
 Convert Docker Compose YAML into Docker commands.
 
-This package is still in flux.
+This package is still in flux. And has bugs.
 
 ## Installation
 Install or upgrade Decompose with this command.
