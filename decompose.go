@@ -10,8 +10,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Prefix is the string that will be inserted before service names.
-var Prefix string
+var (
+	// Prefix is the string that will be inserted before service names.
+	Prefix string
+	// Generate docker run commands with detach flag.
+	Detach bool
+	// Generate docker run commands with remove flag.
+	Remove bool
+)
 
 // ComposeService defines one service declared in a Compose YAML file.
 // Currently, dockerfile, domainname, and extends are not supported.
@@ -72,7 +78,7 @@ func (c ComposeService) String() string {
 
 	// [options]
 	if v := c.Name; v != "" {
-		buf.WriteString("--name=" + v + " ")
+		buf.WriteString("--name=" + Prefix + v + " ")
 	}
 	for _, v := range c.CapAdd {
 		buf.WriteString("--cap-add=" + v + " ")
@@ -85,6 +91,9 @@ func (c ComposeService) String() string {
 	}
 	if v := c.CPUShares; v != "" {
 		buf.WriteString("--cpu-shares=" + v + " ")
+	}
+	if Detach {
+		buf.WriteString("--detach ")
 	}
 	for _, v := range c.Devices {
 		buf.WriteString("--device=" + v + " ")
@@ -120,7 +129,7 @@ func (c ComposeService) String() string {
 		buf.WriteString("--label=" + v + " ")
 	}
 	for _, v := range c.Links {
-		buf.WriteString("--link=" + v + " ")
+		buf.WriteString("--link=" + Prefix + v + " ")
 	}
 	if v := c.LogDriver; v != "" {
 		buf.WriteString("--log-driver=" + v + " ")
@@ -143,6 +152,9 @@ func (c ComposeService) String() string {
 	if c.ReadOnly {
 		buf.WriteString("--read-only ")
 	}
+	if Remove {
+		buf.WriteString("--rm ")
+	}
 	if v := c.Restart; v != "" {
 		buf.WriteString("--restart=" + v + " ")
 	}
@@ -162,7 +174,7 @@ func (c ComposeService) String() string {
 		buf.WriteString("--volume=" + v + " ")
 	}
 	for _, v := range c.VolumesFrom {
-		buf.WriteString("--volumes-from=" + v + " ")
+		buf.WriteString("--volumes-from=" + Prefix + v + " ")
 	}
 	if v := c.WorkingDir; v != "" {
 		buf.WriteString("--workdir=" + v + " ")
@@ -199,18 +211,11 @@ func ParseComposeFile(compPath string) ([]ComposeService, error) {
 	for _, ms := range srvOrder {
 		srvName := ms.Key.(string)
 		srv := srvMap[srvName]
+		srv.Name = srvName
 
 		// required for valid docker-compose file
 		if srv.Build == "" && srv.Image == "" {
-			return nil, fmt.Errorf("%s must specify either image or build", srvName)
-		}
-
-		srv.Name = Prefix + srvName
-		for i := range srv.VolumesFrom {
-			srv.VolumesFrom[i] = Prefix + srv.VolumesFrom[i]
-		}
-		for i := range srv.Links {
-			srv.Links[i] = Prefix + srv.Links[i]
+			return nil, fmt.Errorf("%s must specify either image or build", srv.Name)
 		}
 
 		// filepath on host must be absolute path
