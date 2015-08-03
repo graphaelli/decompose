@@ -1,5 +1,7 @@
 # decompose
-Convert Compose YAML into Docker commands.
+Convert Docker Compose YAML into Docker commands.
+
+This package is still in flux.
 
 ## Installation
 Install or upgrade Decompose with this command.
